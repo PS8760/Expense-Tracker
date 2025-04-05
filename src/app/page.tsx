@@ -1,29 +1,29 @@
 "use client";
-import { useEffect } from "react";
+
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation"; // Import router
 
 export default function LandingPage() {
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
 
   return (
     <div className="bg-gradient-to-br from-black to-gray-900 text-white min-h-screen">
       {/* Navbar */}
-      <nav className="flex justify-between items-center p-6 bg-opacity-80 shadow-md border-b-1 border-amber-600">
+      <nav className="flex justify-between items-center p-6 bg-opacity-80 shadow-md border-b border-amber-600">
         <h1 className="text-2xl font-bold">BudgetBuddy💰📊</h1>
         <div className="space-x-6">
-          <a href="#features" className="hover:text-green-600">
+          <a href="#features" className="hover:text-green-500">
             Features
           </a>
-          <a href="#testimonials" className="hover:text-green-600">
+          <a href="#testimonials" className="hover:text-green-500">
             Testimonials
           </a>
-          <a href="#get-started" className="hover:text-green-600">
+          <a href="#get-started" className="hover:text-green-500">
             Get Started
           </a>
           <button
-            className="bg-green-600 px-4 py-2 rounded-lg"
-            onClick={() => router.push("/auth")} // Navigate to Login/Sign Up page
+            className="bg-green-600 px-4 py-2 rounded-lg hover:bg-green-700 transition"
+            onClick={() => router.push("/auth")}
           >
             Login / Sign Up
           </button>
@@ -40,7 +40,7 @@ export default function LandingPage() {
         >
           Take Control of Your Finances!
         </motion.h2>
-        <p className="text-gray-300 mt-4 text-lg">
+        <p className="text-gray-300 mt-4 text-lg max-w-xl">
           Track your expenses, plan budgets, and make smarter financial
           decisions.
         </p>
@@ -94,7 +94,7 @@ export default function LandingPage() {
               transition={{ duration: 0.5, delay: index * 0.2 }}
               className="bg-gray-800 p-6 rounded-lg max-w-sm"
             >
-              <p className="text-gray-300">"{testimonial}"</p>
+              <p className="text-gray-300">&ldquo;{testimonial}&rdquo;</p>
             </motion.div>
           ))}
         </div>
@@ -107,8 +107,8 @@ export default function LandingPage() {
           Sign up today and start tracking your expenses effortlessly.
         </p>
         <button
-          className="mt-6 bg-green-600 px-6 py-3 rounded-lg text-white text-lg"
-          onClick={() => router.push("/auth")} // Navigate to sign-up page
+          className="mt-6 bg-green-600 px-6 py-3 rounded-lg text-white text-lg hover:bg-green-700 transition"
+          onClick={() => router.push("/auth")}
         >
           Get Started
         </button>
