@@ -11,14 +11,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
-    } catch (err) {
-      setError("Login failed. Please check your credentials.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError("Login failed. Please check your credentials.");
+      } else {
+        setError("Something went wrong.");
+      }
     }
   };
 
