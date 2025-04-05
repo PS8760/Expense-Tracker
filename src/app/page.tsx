@@ -2,9 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 export default function LandingPage() {
   const router = useRouter();
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  if (!hasMounted) return null; // Prevent hydration error
 
   return (
     <div className="bg-gradient-to-br from-black to-gray-900 text-white min-h-screen">
