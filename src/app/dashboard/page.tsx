@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import {
   BarChart,
@@ -10,9 +10,21 @@ import {
   ResponsiveContainer,
   LabelList,
 } from "recharts";
-import { predictInflation } from "@/lib/PredictInflation"; // Assuming this exists
+import { auth, db } from "@/firebase/firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { predictInflation } from "@/lib/PredictInflation"; // Placeholder for ML backend integration
 
-// Sample investment suggestions (replace with actual logic)
+interface Expense {
+  category: string;
+  amount: number;
+}
+
 const sampleSuggestions = [
   {
     title: "Consider Short-Term Bonds",
@@ -37,12 +49,8 @@ const sampleSuggestions = [
   },
 ];
 
-interface Expense {
-  category: string;
-  amount: number;
-}
-
 export default function Dashboard() {
+  const [userId, setUserId] = useState<string | null>(null);
   const [isEarning, setIsEarning] = useState<boolean | null>(null);
   const [salaryInput, setSalaryInput] = useState<string>("");
   const [salary, setSalary] = useState<number | null>(null);
@@ -53,11 +61,55 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const addExpense = () => {
+  // Load authenticated user
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUserId(user.uid);
+        await loadUserData(user.uid);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const loadUserData = async (uid: string) => {
+    const userRef = doc(db, "users", uid);
+    const docSnap = await getDoc(userRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.salary) setSalary(data.salary);
+      if (data.expenses) setExpenses(data.expenses);
+      setIsEarning(true);
+    } else {
+      // Initialize the document
+      await setDoc(userRef, { salary: null, expenses: [] });
+    }
+  };
+
+  const handleSalaryConfirm = async () => {
+    const parsedSalary = Number(salaryInput);
+    setSalary(parsedSalary);
+    if (userId) {
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, {
+        salary: parsedSalary,
+      });
+    }
+  };
+
+  const addExpense = async () => {
     if (category && amount !== null) {
-      setExpenses([...expenses, { category, amount }]);
+      const updatedExpenses = [...expenses, { category, amount }];
+      setExpenses(updatedExpenses);
       setCategory("");
       setAmount(null);
+
+      if (userId) {
+        const userRef = doc(db, "users", userId);
+        await updateDoc(userRef, {
+          expenses: updatedExpenses,
+        });
+      }
     }
   };
 
@@ -66,12 +118,10 @@ export default function Dashboard() {
 
   const handlePredict = async () => {
     setIsLoading(true);
-    setShowSuggestions(false); // Reset suggestions on new prediction
+    setShowSuggestions(false);
     try {
-      // Simulate prediction delay (replace with actual API call)
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Replace this with your actual inflation prediction logic and API call
       const predictionResult = await predictInflation({
         GDP_Growth: 3.0,
         CPI: 2.5,
@@ -81,7 +131,7 @@ export default function Dashboard() {
       setRecommendation(
         predictionResult?.recommendation || "Moderate Inflation Predicted"
       );
-      setShowSuggestions(true); // Show suggestions after successful prediction
+      setShowSuggestions(true);
     } catch (err) {
       console.error(err);
       setRecommendation("Something went wrong with prediction.");
@@ -133,7 +183,7 @@ export default function Dashboard() {
               />
               <button
                 className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition"
-                onClick={() => setSalary(Number(salaryInput))}
+                onClick={handleSalaryConfirm}
               >
                 Confirm Salary
               </button>
