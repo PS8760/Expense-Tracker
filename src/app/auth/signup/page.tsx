@@ -15,43 +15,38 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null); // Clear previous errors
+    setError(null);
 
     try {
-      // Attempt to create a new account
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
+      const { user } = await createUserWithEmailAndPassword(auth, email, password);
 
-      // Store user data in Firestore
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         createdAt: new Date(),
       });
 
-      router.push("/dashboard"); // Redirect to Dashboard after successful signup
-    } catch (error: any) {
-      if (error.code === "auth/email-already-in-use") {
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "code" in err &&
+        (err as { code: string }).code === "auth/email-already-in-use"
+      ) {
         setError("Email already registered. Logging you in...");
 
-        // Attempt to log the user in instead
         try {
-          const userCredential = await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-          );
-          router.push("/dashboard"); // Redirect to Dashboard
-        } catch (loginError: any) {
+          await signInWithEmailAndPassword(auth, email, password);
+          router.push("/dashboard");
+        } catch {
           setError("Wrong password. Try again or reset your password.");
         }
+      } else if (err instanceof Error) {
+        setError(err.message);
       } else {
-        setError(error.message);
+        setError("Something went wrong.");
       }
     }
   };
@@ -60,12 +55,9 @@ export default function SignUpPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-[#1E2938] to-gray-900 backdrop-blur-md">
       <div className="bg-[#1E2938]/90 p-8 rounded-2xl shadow-2xl w-full max-w-sm border border-gray-700">
         <h2 className="text-3xl font-bold text-white mb-6 text-center">
-          Create Your <span className="text-green-500">BudgetBuddy</span>{" "}
-          Account
+          Create Your <span className="text-green-500">BudgetBuddy</span> Account
         </h2>
-        {error && (
-          <p className="text-red-400 text-sm mb-4 text-center">{error}</p>
-        )}
+        {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
 
         <form onSubmit={handleSignUp} className="space-y-4">
           <input
