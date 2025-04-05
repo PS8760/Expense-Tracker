@@ -1,35 +1,84 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/router";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebaseConfig";
 import Link from "next/link";
 
-export default function Home() {
-  const [isHovering, setIsHovering] = useState(false);
+export default function LoginPage() {
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrorMsg("");
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push("/dashboard"); // Redirect on successful login
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrorMsg(error.message);
+      } else {
+        setErrorMsg("Login failed. Please try again.");
+      }
+    }
+  };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-900 p-6">
-      <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6 text-center">
-        Welcome to the Expense Tracker
-      </h1>
+    <div className="flex min-h-screen items-center justify-center bg-gray-900">
+      <div className="w-full max-w-md bg-gray-800 p-8 rounded-lg shadow-lg">
+        <h2 className="text-3xl font-bold text-white text-center mb-6">
+          Login to Your Account
+        </h2>
 
-      <p className="text-white text-center max-w-xl mb-10 text-lg sm:text-xl">
-        Track your expenses, visualize your spending, and get AI-powered investment 
-        recommendations based on inflation prediction. Get insights like &quot;Inflation predictions&quot;, 
-        &quot;Investment strategies&quot;, and more.
-      </p>
+        {errorMsg && (
+          <p className="text-red-500 text-sm text-center mb-4">{errorMsg}</p>
+        )}
 
-      <Link href="/signup">
-        <button
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
-          className={`px-8 py-4 text-lg rounded-lg transition-colors duration-300 font-semibold ${
-            isHovering
-              ? "bg-purple-700 text-white"
-              : "bg-white text-purple-700"
-          }`}
-        >
-          Get Started
-        </button>
-      </Link>
-    </main>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="block text-white mb-1">Email</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white"
+              placeholder="you@example.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-white mb-1">Password</label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
+          >
+            Log In
+          </button>
+        </form>
+
+        <p className="mt-4 text-center text-gray-400">
+          Don't have an account?{" "}
+          <Link href="/signup" className="text-blue-400 hover:underline">
+            Sign Up
+          </Link>
+        </p>
+      </div>
+    </div>
   );
 }
