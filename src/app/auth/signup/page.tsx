@@ -1,64 +1,59 @@
-"use client";
-import { useState } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebaseConfig";
-import { useRouter } from "next/navigation";
+'use client';
 
-export default function SignupPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+import { useState } from 'react';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '@/lib/firebaseConfig';
+import { doc, setDoc } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+
+export default function Signup() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
+  const handleSignup = async () => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard");
-    } catch (err) {
-      setError("Signup failed. Please try again.");
-      console.error(err);
-    } finally {
-      setLoading(false);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Create user document in Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        email: user.email,
+        salary: null,
+        expenses: [],
+      });
+
+      router.push('/dashboard'); // Redirect after successful signup
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <form
-        onSubmit={handleSignup}
-        className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-sm"
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-900">
+      <h2 className="text-white text-3xl font-semibold mb-6">Create an Account</h2>
+      <input
+        className="mb-4 px-4 py-2 rounded bg-gray-800 text-white w-80"
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        className="mb-4 px-4 py-2 rounded bg-gray-800 text-white w-80"
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button
+        className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+        onClick={handleSignup}
       >
-        <h1 className="text-2xl font-bold text-white mb-6">Sign Up</h1>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full mb-4 p-2 rounded bg-gray-700 text-white"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full mb-4 p-2 rounded bg-gray-700 text-white"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
-          disabled={loading}
-        >
-          {loading ? "Signing up..." : "Sign Up"}
-        </button>
-      </form>
+        Sign Up
+      </button>
+      {error && <p className="text-red-400 mt-4">{error}</p>}
     </div>
   );
 }
