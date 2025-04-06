@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -38,3 +39,6 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 =======
 # Expense-tracker
 >>>>>>> e8a126232ae05248d3b5cfde2e72e537925dd1be
+=======
+
+>>>>>>> a03c1a49f5abd75b2208a7bfef31de985cda6b8a
