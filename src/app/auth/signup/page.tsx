@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+
+import { useState, FormEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -7,20 +8,32 @@ import { auth } from "@/firebase/firebaseConfig";
 
 export default function SignUpPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard"); // or wherever post-signup
-    } catch (err: any) {
-      setError(err.message);
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred.");
+      }
     }
+  };
+
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+  };
+
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
   };
 
   return (
@@ -30,6 +43,7 @@ export default function SignUpPage() {
           Create Your <span className="text-green-500">BudgetBuddy</span>{" "}
           Account
         </h2>
+
         <form onSubmit={handleSignUp} className="space-y-4">
           <input
             type="email"
@@ -37,7 +51,7 @@ export default function SignUpPage() {
             required
             className="w-full px-4 py-2 rounded-lg bg-[#1E2938] text-white border border-b-green-600 placeholder-gray-400 outline-none focus:ring-2 focus:ring-green-400 transition"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={handleEmailChange}
           />
           <input
             type="password"
@@ -45,7 +59,7 @@ export default function SignUpPage() {
             required
             className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-b-green-600 placeholder-gray-400 outline-none focus:ring-2 focus:ring-green-500"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handlePasswordChange}
           />
           <button
             type="submit"
@@ -66,6 +80,7 @@ export default function SignUpPage() {
         </div>
 
         <button
+          type="button"
           className="w-full flex items-center justify-center gap-2 py-2 border border-gray-600 rounded-lg text-white hover:bg-gray-700 transition"
           onClick={() => alert("Google Auth Coming Soon")}
         >
