@@ -17,7 +17,7 @@ export default function LandingPage() {
   return (
     <div className="bg-gradient-to-br from-black to-gray-900 text-white min-h-screen">
       {/* Navbar */}
-      <nav className="flex justify-between items-center p-6 bg-opacity-80 shadow-md border-b border-amber-600">
+      <nav className="sticky top-0 z-50 flex justify-between items-center p-6 bg-black bg-opacity-80 shadow-md border-b border-amber-600 backdrop-blur">
         <h1 className="text-2xl font-bold">BudgetBuddy💰📊</h1>
         <div className="space-x-6">
           <a href="#features" className="hover:text-green-500">

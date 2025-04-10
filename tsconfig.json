@@ -13,39 +13,16 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"]
+    },
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    ]
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    "pages/login.js"
-  ],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
-  //  @type {import('tailwindcss').Config}
-  //   module.exports = {
-  //     content: [
-  //       "./pages/**/*.{js,ts,jsx,tsx}",
-  //       "./components/**/*.{js,ts,jsx,tsx}",
-  //     ],
-  //     theme: {
-  //       extend: {},
-  //     },
-  //     plugins: [],
-  //   };
-
-  // "compilerOptions": {
-  //   "baseUrl": ".",
-  //   "paths": {
-  //     "@/*": ["./src/*"]
-  //   }
-  // }
 }
