@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+
+import { useState, FormEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/firebaseConfig";
@@ -7,20 +8,32 @@ import { FcGoogle } from "react-icons/fc";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard"); // or redirect to wherever
-    } catch (err: any) {
-      setError(err.message);
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred.");
+      }
     }
+  };
+
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+  };
+
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
   };
 
   return (
@@ -29,6 +42,7 @@ export default function LoginPage() {
         <h2 className="text-3xl font-bold text-white mb-6 text-center">
           Welcome Back to <span className="text-green-500">BudgetBuddy</span>
         </h2>
+
         <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="email"
@@ -36,7 +50,7 @@ export default function LoginPage() {
             required
             className="w-full px-4 py-2 rounded-lg bg-[#1E2938] text-white border border-b-green-600 placeholder-gray-400 outline-none focus:ring-2 focus:ring-green-400 transition"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={handleEmailChange}
           />
           <input
             type="password"
@@ -44,7 +58,7 @@ export default function LoginPage() {
             required
             className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-b-green-600 placeholder-gray-400 outline-none focus:ring-2 focus:ring-green-500"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handlePasswordChange}
           />
           <button
             type="submit"
@@ -65,6 +79,7 @@ export default function LoginPage() {
         </div>
 
         <button
+          type="button"
           className="w-full flex items-center justify-center gap-2 py-2 border border-gray-600 rounded-lg text-white hover:bg-gray-700 transition"
           onClick={() => alert("Google Auth Coming Soon")}
         >
@@ -73,7 +88,7 @@ export default function LoginPage() {
         </button>
 
         <p className="text-gray-400 text-sm mt-6 text-center">
-          Don’t have an account?{" "}
+          Don&apos;t have an account?{" "}
           <span
             className="text-green-400 hover:underline cursor-pointer"
             onClick={() => router.push("/auth/signup")}
